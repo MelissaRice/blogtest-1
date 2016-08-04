@@ -1,0 +1,82 @@
+
+
+Monday 1 August 2016 [2016.08.01]
+
+Created rxsite as project name and site directory in ~/a/web/dev/runexp/:
+  django-admin startproject rxsite .
+
+In rxsite/rxsite/settings.py changed:
+  TIME_ZONE = 'US/Pacific'
+added:
+  STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+noted: set up by default to use sqlite3 (stick with this for now)
+
+Setup database for the blog (in ~/a/web/dev/runexp/rxsite):
+  python manage.py migrate
+
+Verify that nothing is being served at localhost:8080
+
+Start the webserver (in ~/a/web/dev/runexp/rxsite):
+  python manage.py runserver localhost:8080
+
+Verify the django default page is served at localhost:8080
+
+Setup the blog app (in ~/a/web/dev/runexp/rxsite):
+  python manage.py startapp blog
+
+In the settings.py file (rxsite/rxsite/settings.py) add the app:
+  INSTALLED_APPS = [
+      'django.contrib.admin',
+      'django.contrib.auth',
+      'django.contrib.contenttypes',
+      'django.contrib.sessions',
+      'django.contrib.messages',
+      'django.contrib.staticfiles',
+      'blog',
+  ]
+
+Create the database model for the blog (rxsite/blog/models.py):
+-----------------------------
+from django.db import models
+from django.utils import timezone
+
+class Post(models.Model):
+    author = models.ForeignKey('auth.User')
+    title = models.CharField(max_length=200)
+    text = models.TextField()
+    created_date = models.DateTimeField(default=timezone.now)
+    published_date = models.DateTimeField(blank=True, null=True)
+
+    def publish(self):
+        self.published_date = timezone.now()
+        self.save()
+
+    def __str__(self):
+        return self.title
+-----------------------------
+
+Migrate the database to include the new blog model (in rxsite):
+  python manage.py makemigrations blog
+  python manage.py migrate blog
+
+Set up admin.py for blog posts (in rxsite/blog/admin.py):
+-----------------------------
+from django.contrib import admin
+from .models import Post
+
+admin.site.register(Post)
+-----------------------------
+
+Set up a superuser (in rxsite) called admin with my computer password:
+  python manage.py createsuperuser
+
+Check that the admin page is working in the browser at http://localhost:8080/admin
+
+Add some greeking to make several fake blog posts using the admin interface.
+
+  
+
+
+
+
+
